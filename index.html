@@ -1,0 +1,439 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kunal's Cosmic Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a1e;
+            color: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        section {
+            min-height: 100vh;
+            padding: 5rem 10%;
+            position: relative;
+        }
+
+        h1, h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: #ff00ff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            max-width: 600px;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 10%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 30, 0.9);
+            z-index: 1000;
+        }
+
+        nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin-left: 2rem;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        nav a:hover {
+            color: #00ffcc;
+            transform: scale(1.1);
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100vh;
+        }
+
+        .hero h1 {
+            font-size: 5.5rem;
+            background: linear-gradient(45deg, #ff00ff, #00ffcc);
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            transition: transform 0.5s, box-shadow 0.5s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255, 0, 255, 0.3), rgba(0, 255, 204, 0.3));
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .project-card:hover::before {
+            opacity: 1;
+        }
+
+        .project-card:hover {
+            transform: translateY(-15px) rotate(2deg);
+            box-shadow: 0 0 40px rgba(255, 0, 255, 0.8);
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .skill {
+            background: linear-gradient(45deg, #ff00ff, #00ffcc);
+            color: #0a0a1e;
+            padding: 0.7rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .skill:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+        }
+
+        .resume-btn, .contact-btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(45deg, #ff00ff, #00ffcc);
+            color: #0a0a1e;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            border-radius: 5px;
+            margin-top: 2rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .resume-btn:hover, .contact-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.7);
+        }
+
+        .contact-form {
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .contact-form input, .contact-form textarea {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #ff00ff;
+            color: #e0e0e0;
+            border-radius: 5px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .contact-form input:focus, .contact-form textarea:focus {
+            border-color: #00ffcc;
+            outline: none;
+        }
+
+        #message-preview {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            min-height: 50px;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffcc, 0 0 30px #ff00ff;
+            }
+            to {
+                text-shadow: 0 0 20px #00ffcc, 0 0 30px #ff00ff, 0 0 40px #00ffcc;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bg"></canvas>
+    <nav>
+        <div class="logo">Kunal's Portfolio</div>
+        <div>
+            <a href="#about">About</a>
+            <a href="#projects">Projects</a>
+            <a href="#skills">Skills</a>
+            <a href="#resume">Resume</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Kunal's Cosmic Creations</h1>
+        <p>Embark on a journey through my innovative digital universe</p>
+    </section>
+
+    <section id="about">
+        <h2>About Kunal</h2>
+        <p>Hey, I'm Kunal! A passionate developer and creator, I craft immersive digital experiences that blend cutting-edge technology with vibrant creativity. Let's build something extraordinary!</p>
+    </section>
+
+    <section id="projects">
+        <h2>Projects</h2>
+        <div class="projects-grid">
+            <div class="project-card">
+                <h3>Neon Odyssey</h3>
+                <p>A 3D interactive game with dynamic lighting and real-time physics.</p>
+            </div>
+            <div class="project-card">
+                <h3>Holo Dashboard</h3>
+                <p>A futuristic dashboard UI with holographic effects and animations.</p>
+            </div>
+            <div class="project-card">
+                <h3>AI Visualizer</h3>
+                <p>Real-time data visualization powered by AI and WebGL.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills">
+        <h2>Skills</h2>
+        <div class="skills-container">
+            <span class="skill">JavaScript</span>
+            <span class="skill">Three.js</span>
+            <span class="skill">Html</span>
+            <span class="skill">React</span>
+            <span class="skill">Php</span>
+            <span class="skill">Node.js</span>
+            <span class="skill">Telegram Bots</span>
+        </div>
+    </section>
+
+    <section id="resume">
+        <h2>Resume</h2>
+        <p>Explore my journey and expertise in a downloadable format.</p>
+        <a href="#" class="resume-btn">Download Resume</a>
+    </section>
+
+    <section id="contact">
+        <h2>Contact Kunal</h2>
+        <p>Got an idea? Let's make it happen! Send me a message.</p>
+        <div class="contact-form">
+            <input type="text" id="name" placeholder="Your Name" />
+            <input type="email" id="email" placeholder="Your Email" />
+            <textarea id="message" placeholder="Your Message" rows="5"></textarea>
+            <div id="message-preview">Message Preview: <span>Type to see your message here...</span></div>
+            <a href="t.me/meta_server" class="contact-btn">Send Message</a>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script>
+        // Three.js Particle Background
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Enhanced Particle System
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particleCount = 8000;
+        const posArray = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i += 3) {
+            posArray[i] = (Math.random() - 0.5) * 15;
+            posArray[i + 1] = (Math.random() - 0.5) * 15;
+            posArray[i + 2] = (Math.random() - 0.5) * 15;
+            // Gradient colors between magenta and cyan
+            colors[i] = Math.random() > 0.5 ? 1 : 0; // R: 1 for magenta, 0 for cyan
+            colors[i + 1] = Math.random() > 0.5 ? 0 : 1; // G: 0 for magenta, 1 for cyan
+            colors[i + 2] = 1; // B: always 1 for vibrant effect
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.03,
+            vertexColors: true,
+            transparent: true,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+        camera.position.z = 5;
+
+        // Animation loop with mouse interaction
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particlesMesh.rotation.y += 0.002 + mouseX * 0.005;
+            particlesMesh.rotation.x += mouseY * 0.005;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // GSAP Scroll Animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.from(".hero h1", {
+            opacity: 0,
+            y: 150,
+            duration: 1.8,
+            ease: "power4.out"
+        });
+
+        gsap.from(".hero p", {
+            opacity: 0,
+            y: 100,
+            duration: 1.8,
+            delay: 0.3,
+            ease: "power4.out"
+        });
+
+        document.querySelectorAll("section").forEach((section) => {
+            gsap.from(section.children, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 75%",
+                    toggleActions: "play none none none"
+                },
+                opacity: 0,
+                y: 60,
+                duration: 1.2,
+                stagger: 0.3,
+                ease: "power3.out"
+            });
+        });
+
+        // Interactive project cards
+        document.querySelectorAll(".project-card").forEach((card) => {
+            card.addEventListener("mouseenter", () => {
+                gsap.to(card, { scale: 1.1, rotation: 2, duration: 0.4, ease: "power2.out" });
+            });
+            card.addEventListener("mouseleave", () => {
+                gsap.to(card, { scale: 1, rotation: 0, duration: 0.4, ease: "power2.out" });
+            });
+        });
+
+        // Contact form live preview
+        const messageInput = document.getElementById('message');
+        const preview = document.querySelector('#message-preview span');
+        messageInput.addEventListener('input', () => {
+            preview.textContent = messageInput.value || 'Type to see your message here...';
+        });
+
+        // Responsive canvas
+        window.addEventListener("resize", () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
