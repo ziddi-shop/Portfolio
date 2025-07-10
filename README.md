@@ -1,5 +1,4 @@
 
-```markdown
 # 🚀 Kunal's Cosmic Portfolio
 
 **Welcome to _Kunal's Cosmic Portfolio_**, a **futuristic 3D-animated** portfolio website showcasing my skills, projects, and creativity.  
@@ -34,15 +33,13 @@ Built with sleek UI, scroll-based animations, and glowing cosmic visuals — thi
 ## 📁 Project Structure
 
 ```
-
 Portfolio/
 ├── index.html         # Main page
 ├── css/               # Stylesheets
 ├── js/                # Scripts & animations
 ├── assets/            # Images & media
 ├── README.md          # This file
-
-````
+```
 
 ---
 
@@ -66,26 +63,26 @@ cd Portfolio
 npx live-server
 
 # OR open index.html directly in browser
-````
+```
 
 ---
 
 ## 🔧 Customization Ideas
 
-* 📩 **Telegram Bot** – Send form messages to your Telegram using [@meta\_server](https://t.me/meta_server)
-* 📡 **Dynamic Project Feed** – Use GitHub API to show latest projects
-* 🚀 **3D Logo/Model** – Replace background with spaceship/logo using Three.js
-* 🌗 **Theme Toggle** – Add dark/light switcher
-* 📈 **Google Analytics** – Track real visitors
-* ✍️ **Blog Section** – Write blogs using markdown or a CMS (e.g., Contentful)
+- 📩 **Telegram Bot** – Send form messages to your Telegram using [@meta_server](https://t.me/meta_server)
+- 📡 **Dynamic Project Feed** – Use GitHub API to show latest projects
+- 🚀 **3D Logo/Model** – Replace background with spaceship/logo using Three.js
+- 🌗 **Theme Toggle** – Add dark/light switcher
+- 📈 **Google Analytics** – Track real visitors
+- ✍️ **Blog Section** – Write blogs using markdown or a CMS (e.g., Contentful)
 
 ---
 
 ## 📬 Contact Me
 
-* 💻 **GitHub**: [github.com/ziddi-shop](https://github.com/ziddi-shop)
-* 🌍 **Live Portfolio**: [your-port-folio.netlify.app](https://your-port-folio.netlify.app)
-* 📨 **Telegram**: [@meta\_server](https://t.me/meta_server)
+- 💻 **GitHub**: [github.com/ziddi-shop](https://github.com/ziddi-shop)
+- 🌍 **Live Portfolio**: [your-port-folio.netlify.app](https://your-port-folio.netlify.app)
+- 📨 **Telegram**: [@meta_server](https://t.me/meta_server)
 
 ---
 
@@ -109,20 +106,9 @@ git push origin feature/YourFeature
 
 ## 📄 License
 
-This project is licensed under the **MIT License**.
+This project is licensed under the **MIT License**.  
 Check the [`LICENSE`](./LICENSE) file for more info.
 
 ---
 
 > Made with 💻, ☕, and ⚡ by **Kunal** — Let's build the future together!
-
-```
-
----
-
-✅ **Copy this directly into your `README.md`** file.  
-✅ All links are now visible and **clickable**.  
-✅ If you want, I can also make the whole site deployable with Netlify badges and previews.
-
-Let me know if you want **dark preview banner**, **Netlify Deploy Now** button, or **GitHub Shields** too.
-```
